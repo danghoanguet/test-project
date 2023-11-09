@@ -5,15 +5,13 @@ import 'package:tesstprovicer/models/company_entity.dart';
 
 class CustomListTile<T> extends StatefulWidget {
   final T entity;
-  final Widget? trailing;
+  final Widget? prefixWidget;
   final bool isActive;
-  // final Function(dynamic)? onTap;
   const CustomListTile({
     super.key,
     required this.entity,
-    this.trailing,
+    this.prefixWidget,
     this.isActive = false,
-    // this.onTap,
   });
 
   @override
@@ -21,17 +19,8 @@ class CustomListTile<T> extends StatefulWidget {
 }
 
 class _CustomListTileState<T> extends State<CustomListTile> {
-  ValueNotifier<bool> isActive = ValueNotifier(false);
-
-  @override
-  void initState() {
-    isActive.value = widget.isActive;
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
-    print("build");
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(8.0).copyWith(bottom: 16, left: 0),
@@ -69,33 +58,29 @@ class _CustomListTileState<T> extends State<CustomListTile> {
               ),
             ),
           ),
-          ValueListenableBuilder<bool>(
-              valueListenable: isActive,
-              builder: (context, isActive, _) {
-                return widget.trailing ??
-                    Container(
-                      padding: EdgeInsets.all(isActive ? 2 : 0),
-                      decoration: BoxDecoration(
-                        color: Colors.transparent,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          width: 1,
-                          color: isActive ? Colors.amber : Colors.grey,
-                        ),
-                      ),
-                      width: 20,
-                      height: 20,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: isActive ? Colors.amber : Colors.transparent,
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: isActive ? Colors.amber : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    );
-              }),
+          widget.prefixWidget ??
+              Container(
+                padding: EdgeInsets.all(widget.isActive ? 2 : 0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent,
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    width: 1,
+                    color: widget.isActive ? Colors.amber : Colors.grey,
+                  ),
+                ),
+                width: 20,
+                height: 20,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: widget.isActive ? Colors.amber : Colors.transparent,
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: widget.isActive ? Colors.amber : Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
         ],
       ),
     );

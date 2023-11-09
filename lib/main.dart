@@ -52,6 +52,18 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text("Country: ${countryEntity?.countryName}"),
+              const SizedBox(
+                height: 12,
+              ),
+              Text("Company: ${companyEntity?.companyName}"),
+              const SizedBox(
+                height: 12,
+              ),
+              Text("City: ${cityEntity?.cityName}"),
+              const SizedBox(
+                height: 12,
+              ),
               baseTextField(
                 controller: _countryController,
                 hintText: 'Select country',
@@ -117,57 +129,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void onTapTextField(BuildContext context, Widget body) {
-    showBottomSheetBase(
-      context,
-      body: body,
-    );
+    showBottomSheetBase(context, body: body);
   }
 
   void onChooseItemCallBack(dynamic entity) {
-    if (entity is CountryEntity) {
-      final CountryEntity country = entity;
-      countryEntity = country;
-      _countryController.text = country.countryName;
-      return;
-    }
-    if (entity is CompanyEntity) {
-      final CompanyEntity company = entity;
-      companyEntity = company;
-      _companyController.text = company.companyName;
-      return;
-    }
-    if (entity is CityEntity) {
-      final CityEntity city = entity;
-      cityEntity = city;
-      _cityController.text = city.cityName;
-      return;
-    }
-    // Khong duoc ?
-    // switch (entity) {
-    //   case CountryEntity:
-    //     {
-    //       final CountryEntity country = entity as CountryEntity;
-    //       countryEntity = country;
-    //       _countryController.text = country.countryName;
-    //       return;
-    //     }
-    //   case CompanyEntity:
-    //     {
-    //       final CompanyEntity company = entity as CompanyEntity;
-    //       companyEntity = company;
-    //       _companyController.text = company.companyName;
-    //       return;
-    //     }
-    //   case CityEntity:
-    //     {
-    //       final CityEntity city = entity as CityEntity;
-    //       cityEntity = city;
-    //       _cityController.text = city.cityName;
-    //       return;
-    //     }
-    //   default:
-    //     return;
-    // }
+    setState(() {
+      if (entity is CountryEntity) {
+        final CountryEntity country = entity;
+        countryEntity = country;
+        _countryController.text = country.countryName;
+        return;
+      }
+      if (entity is CompanyEntity) {
+        final CompanyEntity company = entity;
+        companyEntity = company;
+        _companyController.text = company.companyName;
+        return;
+      }
+      if (entity is CityEntity) {
+        final CityEntity city = entity;
+        cityEntity = city;
+        _cityController.text = city.cityName;
+        return;
+      }
+    });
   }
 
   Widget baseTextField({

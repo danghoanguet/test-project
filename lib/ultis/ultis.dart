@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 Future<void> showBottomSheetBase(
   BuildContext context, {
   Widget? body,
-  double totalMaxHeight = 0.7,
+  double totalMaxHeight = 0.8,
   bool isDismissible = true,
   bool isShowIndicator = true,
   bool isAutoScroll = false,
-  double? height,
+  double? desireHeight,
 }) async {
-  final ValueNotifier<double> columnHeight = ValueNotifier(height ?? 0);
+  final ValueNotifier<double> columnHeight = ValueNotifier(desireHeight ?? 0);
   final GlobalKey columnKey = GlobalKey();
   final ScrollController scrollController = ScrollController();
   // Calculate height after render body
@@ -53,38 +53,36 @@ Future<void> showBottomSheetBase(
                 bottom: 30,
               ),
               height: height,
-              child: SingleChildScrollView(
-                  controller: scrollController,
-                  physics: const ClampingScrollPhysics(),
-                  child: Column(
-                    key: columnKey,
-                    children: [
-                      Column(
-                        children: [
-                          if (isShowIndicator)
-                            Align(
-                              alignment: Alignment.center,
-                              child: Container(
-                                margin: const EdgeInsets.only(
-                                  top: 10,
-                                  bottom: 24,
-                                ),
-                                height: 4,
-                                width: 48,
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFDFE4EA),
-                                  borderRadius: BorderRadius.circular(3),
-                                ),
+              child: Scaffold(
+                body: SingleChildScrollView(
+                    controller: scrollController,
+                    physics: const ClampingScrollPhysics(),
+                    child: Column(
+                      key: columnKey,
+                      children: [
+                        if (isShowIndicator)
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              margin: const EdgeInsets.only(
+                                top: 10,
+                                bottom: 24,
+                              ),
+                              height: 4,
+                              width: 48,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFDFE4EA),
+                                borderRadius: BorderRadius.circular(3),
                               ),
                             ),
-                          body ??
-                              const Center(
-                                child: Text("Nothing here"),
-                              ),
-                        ],
-                      ),
-                    ],
-                  )),
+                          ),
+                        body ??
+                            const Center(
+                              child: Text("Nothing here"),
+                            ),
+                      ],
+                    )),
+              ),
             );
           });
     },
