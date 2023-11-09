@@ -52,7 +52,7 @@ Future<void> showBottomSheetBase(
               margin: const EdgeInsets.only(
                 bottom: 30,
               ),
-              height: height,
+              height: 500,
               child: Scaffold(
                 body: SingleChildScrollView(
                     controller: scrollController,

@@ -3,7 +3,7 @@ import 'package:tesstprovicer/models/country_entity.dart';
 import 'package:tesstprovicer/models/city_entity.dart';
 import 'package:tesstprovicer/models/company_entity.dart';
 
-class CustomListTile<T> extends StatefulWidget {
+class CustomListTile<T> extends StatelessWidget {
   final T entity;
   final Widget? prefixWidget;
   final bool isActive;
@@ -14,11 +14,6 @@ class CustomListTile<T> extends StatefulWidget {
     this.isActive = false,
   });
 
-  @override
-  State<CustomListTile> createState() => _CustomListTileState<T>();
-}
-
-class _CustomListTileState<T> extends State<CustomListTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -35,21 +30,21 @@ class _CustomListTileState<T> extends State<CustomListTile> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          if (getImageUrl(widget.entity) != null)
+          if (getImageUrl(entity) != null)
             Container(
               margin: const EdgeInsets.only(
                 right: 8,
               ),
               child: CircleAvatar(
                 radius: 20.0,
-                backgroundImage: NetworkImage(getImageUrl(widget.entity)!),
+                backgroundImage: NetworkImage(getImageUrl(entity)!),
               ),
             ),
           Expanded(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8.0),
               child: Text(
-                getTitle(widget.entity),
+                getTitle(entity),
                 style: const TextStyle(
                   fontSize: 17,
                   height: 1.1,
@@ -58,25 +53,25 @@ class _CustomListTileState<T> extends State<CustomListTile> {
               ),
             ),
           ),
-          widget.prefixWidget ??
+          prefixWidget ??
               Container(
-                padding: EdgeInsets.all(widget.isActive ? 2 : 0),
+                padding: EdgeInsets.all(isActive ? 2 : 0),
                 decoration: BoxDecoration(
                   color: Colors.transparent,
                   shape: BoxShape.circle,
                   border: Border.all(
                     width: 1,
-                    color: widget.isActive ? Colors.amber : Colors.grey,
+                    color: isActive ? Colors.amber : Colors.grey,
                   ),
                 ),
                 width: 20,
                 height: 20,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: widget.isActive ? Colors.amber : Colors.transparent,
+                    color: isActive ? Colors.amber : Colors.transparent,
                     shape: BoxShape.circle,
                     border: Border.all(
-                      color: widget.isActive ? Colors.amber : Colors.grey,
+                      color: isActive ? Colors.amber : Colors.grey,
                     ),
                   ),
                 ),

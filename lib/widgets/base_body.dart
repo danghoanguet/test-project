@@ -5,8 +5,9 @@ import 'package:tesstprovicer/models/company_entity.dart';
 import 'package:tesstprovicer/models/country_entity.dart';
 import 'package:tesstprovicer/ultis/extenstions.dart';
 import 'package:tesstprovicer/widgets/custom_list_tile.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BaseBody<T> extends StatefulWidget {
+class BaseBody<T> extends ConsumerStatefulWidget {
   final T? currentEntity;
   final String? title;
   final bool? hasFilter;
@@ -20,22 +21,26 @@ class BaseBody<T> extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<BaseBody> createState() => _BaseBodyState<T>();
+  ConsumerState<BaseBody> createState() => _BaseBodyState<T>();
 }
 
-class _BaseBodyState<T> extends State<BaseBody> {
-  final ValueNotifier<bool> _isIconClearVisible = ValueNotifier(false);
-  final TextEditingController _searchFieldController = TextEditingController();
-  final ValueNotifier<int?> _currentIndex = ValueNotifier(null);
-  final ValueNotifier<List<T>> _listEntites = ValueNotifier([]);
+class _BaseBodyState<T> extends ConsumerState<BaseBody> {
   late List<T> originData;
+
+  final _isIconClearVisible = StateProvider<bool>((_) => false);
+  final _currentIndex = StateProvider<int?>((_) => null);
+  final _listEntites = StateProvider<List<T>>((_) => []);
+
+  final TextEditingController _searchFieldController = TextEditingController();
 
   @override
   void initState() {
     originData = Data.getData(T);
-    _listEntites.value = originData;
-    _currentIndex.value =
-        originData.indexWhere((element) => checkIsActive(element));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(_listEntites.notifier).state = originData;
+      ref.read(_currentIndex.notifier).state =
+          originData.indexWhere((element) => checkIsActive(element));
+    });
     super.initState();
   }
 
@@ -45,35 +50,25 @@ class _BaseBodyState<T> extends State<BaseBody> {
       padding: const EdgeInsets.symmetric(
         horizontal: 16,
       ),
-      child: ValueListenableBuilder<int?>(
-          valueListenable: _currentIndex,
-          builder: (context, currentIndex, _) {
-            return SingleChildScrollView(
-              child: ValueListenableBuilder<List<T>>(
-                  valueListenable: _listEntites,
-                  builder: (context, data, _) {
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        if (widget.title.isNotNullAndNotEmpty)
-                          Text(
-                            widget.title ?? "",
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.normal,
-                              color: Colors.black,
-                            ),
-                          ),
-                        (widget.hasFilter ?? false)
-                            ? _searchInput()
-                            : Container(),
-                        ..._buildListItem(data, currentIndex)
-                      ],
-                    );
-                  }),
-            );
-          }),
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            if (widget.title.isNotNullAndNotEmpty)
+              Text(
+                widget.title ?? "",
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.normal,
+                  color: Colors.black,
+                ),
+              ),
+            (widget.hasFilter ?? false) ? _searchInput() : Container(),
+            ..._buildListItem(ref.watch(_listEntites), ref.watch(_currentIndex))
+          ],
+        ),
+      ),
     );
   }
 
@@ -86,7 +81,7 @@ class _BaseBodyState<T> extends State<BaseBody> {
             if (widget.onTap != null) {
               widget.onTap!(data[i]);
             }
-            _currentIndex.value = i;
+            ref.read(_currentIndex.notifier).state = i;
             Navigator.of(context).pop();
           },
           child: CustomListTile<T>(
@@ -102,65 +97,61 @@ class _BaseBodyState<T> extends State<BaseBody> {
   Widget _searchInput() {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 0),
-      child: ValueListenableBuilder<bool>(
-          valueListenable: _isIconClearVisible,
-          builder: (context, value, _) {
-            return TextField(
-              maxLength: 100,
-              controller: _searchFieldController,
-              autofocus: false,
-              onChanged: (text) {
-                if (text.isNotEmpty) {
-                  _isIconClearVisible.value = true;
-                } else {
-                  _isIconClearVisible.value = false;
-                }
-                _onChangeSearch(text);
-              },
-              onEditingComplete: (() {
-                FocusScope.of(context).unfocus();
-                return;
-              }),
-              style: const TextStyle(fontSize: 17, height: 1.3),
-              cursorColor: Colors.grey,
-              decoration: InputDecoration(
-                counterText: "",
-                suffixIconConstraints:
-                    const BoxConstraints(minHeight: 18, minWidth: 18),
-                suffixIcon: _isIconClearVisible.value
-                    ? InkWell(
-                        onTap: () {
-                          _searchFieldController.clear();
-                          _listEntites.value = originData;
-                          _isIconClearVisible.value = false;
-                        },
-                        child: const Padding(
-                          padding: EdgeInsets.only(right: 14),
-                          child: Icon(Icons.clear),
-                        ),
-                      )
-                    : null,
-                prefixIcon: const Icon(Icons.search, color: Colors.black87),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                hintText: "Search for ${(widget.title ?? "").toLowerCase()}...",
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(
-                    width: 1,
-                    color: Colors.black54.withOpacity(0.4),
+      child: TextField(
+        maxLength: 100,
+        controller: _searchFieldController,
+        autofocus: false,
+        onChanged: (text) {
+          if (text.isNotEmpty) {
+            ref.read(_isIconClearVisible.notifier).state = true;
+          } else {
+            ref.read(_isIconClearVisible.notifier).state = false;
+          }
+          _onChangeSearch(text);
+        },
+        onEditingComplete: (() {
+          FocusScope.of(context).unfocus();
+          return;
+        }),
+        style: const TextStyle(fontSize: 17, height: 1.3),
+        cursorColor: Colors.grey,
+        decoration: InputDecoration(
+          counterText: "",
+          suffixIconConstraints:
+              const BoxConstraints(minHeight: 18, minWidth: 18),
+          suffixIcon: ref.watch(_isIconClearVisible)
+              ? InkWell(
+                  onTap: () {
+                    _searchFieldController.clear();
+                    ref.read(_listEntites.notifier).state = originData;
+                    ref.read(_isIconClearVisible.notifier).state = false;
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.only(right: 14),
+                    child: Icon(Icons.clear),
                   ),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(22),
-                  borderSide: const BorderSide(
-                    width: 0,
-                    color: Color(0xFFF4F7FA),
-                  ),
-                ),
-              ),
-            );
-          }),
+                )
+              : null,
+          prefixIcon: const Icon(Icons.search, color: Colors.black87),
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+          hintText: "Search for ${(widget.title ?? "").toLowerCase()}...",
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(
+              width: 1,
+              color: Colors.black54.withOpacity(0.4),
+            ),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(22),
+            borderSide: const BorderSide(
+              width: 0,
+              color: Color(0xFFF4F7FA),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -192,7 +183,7 @@ class _BaseBodyState<T> extends State<BaseBody> {
     name = name.toLowerCase().trim();
     List<T> foundEntity = [];
     if (name == "") {
-      _listEntites.value = originData;
+      ref.read(_listEntites.notifier).state = originData;
       return;
     } else {
       for (T entity in originData) {
@@ -223,9 +214,9 @@ class _BaseBodyState<T> extends State<BaseBody> {
       }
     }
     if (foundEntity.isNotEmpty) {
-      _listEntites.value = foundEntity;
+      ref.read(_listEntites.notifier).state = foundEntity;
     } else {
-      _listEntites.value = [];
+      ref.read(_listEntites.notifier).state = [];
     }
   }
 }
