@@ -4,9 +4,10 @@ import 'package:tesstprovicer/models/company_entity.dart';
 import 'package:tesstprovicer/models/country_entity.dart';
 import 'package:tesstprovicer/ultis/ultis.dart';
 import 'package:tesstprovicer/widgets/base_body.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -19,28 +20,24 @@ class MyApp extends StatelessWidget {
           appBar: AppBar(
             title: const Text('Test'),
           ),
-          body: const HomeScreen()),
+          body: HomeScreen()),
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+class HomeScreen extends ConsumerWidget {
+  HomeScreen({Key? key}) : super(key: key);
 
-  @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
+  final _countryProvider = StateProvider<CountryEntity?>((_) => null);
+  final _companyProvider = StateProvider<CompanyEntity?>((_) => null);
+  final _cityProvider = StateProvider<CityEntity?>((_) => null);
 
-class _HomeScreenState extends State<HomeScreen> {
-  CountryEntity? countryEntity;
-  CompanyEntity? companyEntity;
-  CityEntity? cityEntity;
   final TextEditingController _countryController = TextEditingController();
   final TextEditingController _companyController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(
         vertical: 12,
@@ -52,15 +49,15 @@ class _HomeScreenState extends State<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Country: ${countryEntity?.countryName}"),
+              Text("Country: ${ref.watch(_countryProvider)?.countryName}"),
               const SizedBox(
                 height: 12,
               ),
-              Text("Company: ${companyEntity?.companyName}"),
+              Text("Company: ${ref.watch(_companyProvider)?.companyName}"),
               const SizedBox(
                 height: 12,
               ),
-              Text("City: ${cityEntity?.cityName}"),
+              Text("City: ${ref.watch(_cityProvider)?.cityName}"),
               const SizedBox(
                 height: 12,
               ),
@@ -71,11 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTapTextField(
                     context,
                     BaseBody<CountryEntity>(
-                      currentEntity: countryEntity,
+                      currentEntity: ref.read(_countryProvider),
                       title: "Country",
                       hasFilter: true,
                       onTap: (entity) {
-                        onChooseItemCallBack(entity);
+                        onChooseItemCallBack(entity, ref);
                       },
                     ),
                   );
@@ -91,11 +88,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTapTextField(
                     context,
                     BaseBody<CompanyEntity>(
-                      currentEntity: companyEntity,
+                      currentEntity: ref.read(_companyProvider),
                       title: "Company",
-                      hasFilter: true,
                       onTap: (entity) {
-                        onChooseItemCallBack(entity);
+                        onChooseItemCallBack(entity, ref);
                       },
                     ),
                   );
@@ -111,11 +107,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   onTapTextField(
                     context,
                     BaseBody<CityEntity>(
-                      currentEntity: cityEntity,
+                      currentEntity: ref.read(_cityProvider),
                       title: "City",
-                      hasFilter: true,
                       onTap: (entity) {
-                        onChooseItemCallBack(entity);
+                        onChooseItemCallBack(entity, ref);
                       },
                     ),
                   );
@@ -132,27 +127,30 @@ class _HomeScreenState extends State<HomeScreen> {
     showBottomSheetBase(context, body: body);
   }
 
-  void onChooseItemCallBack(dynamic entity) {
-    setState(() {
-      if (entity is CountryEntity) {
-        final CountryEntity country = entity;
-        countryEntity = country;
-        _countryController.text = country.countryName;
-        return;
-      }
-      if (entity is CompanyEntity) {
-        final CompanyEntity company = entity;
-        companyEntity = company;
-        _companyController.text = company.companyName;
-        return;
-      }
-      if (entity is CityEntity) {
-        final CityEntity city = entity;
-        cityEntity = city;
-        _cityController.text = city.cityName;
-        return;
-      }
-    });
+  void onChooseItemCallBack(dynamic entity, WidgetRef ref) {
+    // setState(() {
+    if (entity is CountryEntity) {
+      final CountryEntity country = entity;
+      ref.read(_countryProvider.notifier).state = country;
+      // countryEntity = country;
+      _countryController.text = country.countryName;
+      return;
+    }
+    if (entity is CompanyEntity) {
+      final CompanyEntity company = entity;
+      ref.read(_companyProvider.notifier).state = company;
+      // companyEntity = company;
+      _companyController.text = company.companyName;
+      return;
+    }
+    if (entity is CityEntity) {
+      final CityEntity city = entity;
+      ref.read(_cityProvider.notifier).state = city;
+      // cityEntity = city;
+      _cityController.text = city.cityName;
+      return;
+    }
+    // });
   }
 
   Widget baseTextField({
