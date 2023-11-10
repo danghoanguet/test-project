@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tesstprovicer/models/country_entity.dart';
-import 'package:tesstprovicer/models/city_entity.dart';
-import 'package:tesstprovicer/models/company_entity.dart';
+import 'package:tesstprovicer/widgets/base_body.dart';
 
-class CustomListTile<T> extends StatelessWidget {
+class CustomListTile<T extends BaseEntity> extends StatelessWidget {
   final T entity;
   final Widget? prefixWidget;
   final bool isActive;
@@ -82,37 +80,10 @@ class CustomListTile<T> extends StatelessWidget {
   }
 
   String? getImageUrl(T data) {
-    switch (T) {
-      case CountryEntity:
-        {
-          return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSlayhegQudmnTDlrr7g09ejr1fBN6YKKkUCb-n6fBG7P8XbwVPMEJ6SFIxdKYACdHGTUM&usqp=CAU";
-          // final countryEntity = data as CountryEntity;
-          // return countryEntity.countryFlag;
-        }
-      default:
-        return null;
-    }
+    return data.getImageUrl;
   }
 
   String getTitle(T data) {
-    switch (T) {
-      case CountryEntity:
-        {
-          final countryEntity = data as CountryEntity;
-          return countryEntity.countryName;
-        }
-      case CompanyEntity:
-        {
-          final companyEntity = data as CompanyEntity;
-          return companyEntity.companyName;
-        }
-      case CityEntity:
-        {
-          final cityEntity = data as CityEntity;
-          return cityEntity.cityName;
-        }
-      default:
-        return "";
-    }
+    return data.getSearchName;
   }
 }

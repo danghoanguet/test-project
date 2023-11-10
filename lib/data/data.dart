@@ -2,6 +2,7 @@ import 'package:tesstprovicer/data/entites.dart';
 import 'package:tesstprovicer/models/city_entity.dart';
 import 'package:tesstprovicer/models/company_entity.dart';
 import 'package:tesstprovicer/models/country_entity.dart';
+import 'package:tesstprovicer/widgets/base_body.dart';
 
 class Data {
   static const country = [
@@ -326,22 +327,22 @@ class Data {
     {"cityId": 53, "cityName": "Kompong Speu"}
   ];
 
-  static dynamic getData(dynamic entity) {
-    switch (entity) {
+  static List<BaseEntity> getData<T extends BaseEntity>() {
+    switch (T) {
       case CountryEntity:
         {
           return Entites.getCountryData();
-        }
-      case CompanyEntity:
-        {
-          return Entites.getCompanyData();
         }
       case CityEntity:
         {
           return Entites.getCityData();
         }
-      default:
-        return [];
+      case CompanyEntity:
+        {
+          return Entites.getCompanyData();
+        }
     }
+
+    return <T>[];
   }
 }

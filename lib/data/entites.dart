@@ -2,9 +2,10 @@ import 'package:tesstprovicer/data/data.dart';
 import 'package:tesstprovicer/models/city_entity.dart';
 import 'package:tesstprovicer/models/company_entity.dart';
 import 'package:tesstprovicer/models/country_entity.dart';
+import 'package:tesstprovicer/widgets/base_body.dart';
 
 class Entites {
-  static List<CountryEntity> getCountryData() {
+  static List<BaseEntity> getCountryData() {
     List<CountryEntity> res = [];
     for (var country in Data.country) {
       res.add(CountryEntity.fromResponse(country));

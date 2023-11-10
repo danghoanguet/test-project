@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:tesstprovicer/data/data.dart';
-import 'package:tesstprovicer/models/city_entity.dart';
-import 'package:tesstprovicer/models/company_entity.dart';
-import 'package:tesstprovicer/models/country_entity.dart';
 import 'package:tesstprovicer/ultis/extenstions.dart';
 import 'package:tesstprovicer/widgets/custom_list_tile.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BaseBody<T> extends ConsumerStatefulWidget {
-  final T? currentEntity;
+abstract class BaseEntity {
+  String get getSearchName;
+  String get getSearchId;
+  String? get getImageUrl;
+
+  List<BaseEntity> getData();
+}
+
+class BaseBody<B extends BaseEntity> extends ConsumerStatefulWidget {
+  final B? currentEntity;
   final String? title;
   final bool? hasFilter;
   final Function(dynamic)? onTap;
@@ -21,21 +26,22 @@ class BaseBody<T> extends ConsumerStatefulWidget {
   }) : super(key: key);
 
   @override
-  ConsumerState<BaseBody> createState() => _BaseBodyState<T>();
+  ConsumerState<BaseBody> createState() => _BaseBodyState<B>();
 }
 
-class _BaseBodyState<T> extends ConsumerState<BaseBody> {
-  late List<T> originData;
+class _BaseBodyState<Entity extends BaseEntity>
+    extends ConsumerState<BaseBody> {
+  late List<BaseEntity> originData;
 
   final _isIconClearVisible = StateProvider<bool>((_) => false);
   final _currentIndex = StateProvider<int?>((_) => null);
-  final _listEntites = StateProvider<List<T>>((_) => []);
+  final _listEntites = StateProvider<List<BaseEntity>>((_) => []);
 
   final TextEditingController _searchFieldController = TextEditingController();
 
   @override
   void initState() {
-    originData = Data.getData(T);
+    originData = Data.getData<Entity>();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ref.read(_listEntites.notifier).state = originData;
       ref.read(_currentIndex.notifier).state =
@@ -72,7 +78,7 @@ class _BaseBodyState<T> extends ConsumerState<BaseBody> {
     );
   }
 
-  List<Widget> _buildListItem(List<T> data, int? currentIndex) {
+  List<Widget> _buildListItem(List<BaseEntity> data, int? currentIndex) {
     List<Widget> res = [];
     for (int i = 0; i < data.length; i++) {
       res.add(
@@ -84,7 +90,7 @@ class _BaseBodyState<T> extends ConsumerState<BaseBody> {
             ref.read(_currentIndex.notifier).state = i;
             Navigator.of(context).pop();
           },
-          child: CustomListTile<T>(
+          child: CustomListTile<BaseEntity>(
             isActive: ((currentIndex ?? -1) == i),
             entity: data[i],
           ),
@@ -155,61 +161,21 @@ class _BaseBodyState<T> extends ConsumerState<BaseBody> {
     );
   }
 
-  bool checkIsActive(T entity) {
+  bool checkIsActive(BaseEntity entity) {
     if (widget.currentEntity == null) return false;
-    bool res = false;
-    if (entity is CountryEntity) {
-      final countryEntity = entity;
-      final currentEntity = widget.currentEntity as CountryEntity;
-
-      return res = countryEntity.countryId == currentEntity.countryId;
-    }
-    if (entity is CompanyEntity) {
-      final companyEntity = entity;
-      final currentEntity = widget.currentEntity as CompanyEntity;
-
-      return res = companyEntity.companyName == currentEntity.companyName;
-    }
-    if (entity is CityEntity) {
-      final cityEntity = entity;
-      final currentEntity = widget.currentEntity as CityEntity;
-
-      return res = cityEntity.cityId == currentEntity.cityId;
-    }
-    return res;
+    return entity.getSearchId == widget.currentEntity!.getSearchId;
   }
 
   void _onChangeSearch(String name) {
     name = name.toLowerCase().trim();
-    List<T> foundEntity = [];
+    List<BaseEntity> foundEntity = [];
     if (name == "") {
       ref.read(_listEntites.notifier).state = originData;
       return;
     } else {
-      for (T entity in originData) {
-        if (entity is CountryEntity) {
-          final countryEntity = entity;
-          if (countryEntity.countryName
-              .toLowerCase()
-              .trim()
-              .contains(name, 0)) {
-            foundEntity.add(entity);
-          }
-        }
-        if (entity is CompanyEntity) {
-          final companyEntity = entity;
-          if (companyEntity.companyName
-              .toLowerCase()
-              .trim()
-              .contains(name, 0)) {
-            foundEntity.add(entity);
-          }
-        }
-        if (entity is CityEntity) {
-          final cityEntity = entity;
-          if (cityEntity.cityName.toLowerCase().trim().contains(name, 0)) {
-            foundEntity.add(entity);
-          }
+      for (BaseEntity entity in originData) {
+        if ((entity.getSearchName).toLowerCase().trim().contains(name, 0)) {
+          foundEntity.add(entity);
         }
       }
     }

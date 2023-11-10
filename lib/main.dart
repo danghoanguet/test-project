@@ -49,15 +49,15 @@ class HomeScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Country: ${ref.watch(_countryProvider)?.countryName}"),
+              Text("Country: ${ref.watch(_countryProvider)?.countryCode}"),
               const SizedBox(
                 height: 12,
               ),
-              Text("Company: ${ref.watch(_companyProvider)?.companyName}"),
+              Text("Company: ${ref.watch(_companyProvider)?.companyCode}"),
               const SizedBox(
                 height: 12,
               ),
-              Text("City: ${ref.watch(_cityProvider)?.cityName}"),
+              Text("City: ${ref.watch(_cityProvider)?.cityId}"),
               const SizedBox(
                 height: 12,
               ),
